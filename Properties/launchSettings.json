@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "projectpl3": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
