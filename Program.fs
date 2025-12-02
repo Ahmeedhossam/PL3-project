@@ -24,7 +24,7 @@ let main argv =
     // 3. نجرب نبحث عن "apple" (سمول) عشان نختبر الـ clean
     printfn "\n2. Searching for 'apple' (small)..."
     match searchExact "apple" dictAfterAdd with
-    | Some (key, meaning) -> printfn "✅ Found: %s -> %s" key meaning
+    | Some (key, meaning) -> printfn "Found: %s -> %s" key meaning
     | None -> printfn " Not Found!"
 
     // 4. نجرب بحث جزئي عن "ppl"

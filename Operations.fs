@@ -6,6 +6,20 @@ open System.Text.RegularExpressions
 
 
 
+// ==============================
+
+// في الكود او الكومنتس كلمة مفتاح او key 
+// معناها الكلمة نفسها الي في القاموس عشان محدش يتلغبط  
+
+// =============================
+
+
+
+
+
+
+
+
 let private clean (s: string) = 
     if String.IsNullOrWhiteSpace(s) then "" 
     else 
