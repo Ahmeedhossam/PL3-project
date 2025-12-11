@@ -2,24 +2,21 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="wordmodel.fs" />
-
 		<Compile Include="Operations.fs" />
 		<Compile Include="filesIO.fs" />
-
 		<Compile Include="UI.fs" />
-
 		<Compile Include="Tests.fs" />
-
 		<Compile Include="Program.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="FSharp.SystemTextJson" Version="1.4.36" />
+		<PackageReference Include="FSharp.SystemTextJson" Version="1.4.36" />
 	</ItemGroup>
 
 </Project>
