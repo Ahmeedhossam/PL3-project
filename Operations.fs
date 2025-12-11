@@ -65,7 +65,7 @@ let deleteWord (word: string) (dict: MyDictionary) =
 
 // Search Operations
 
-let searchExact (query: string) (dict: MyDictionary) =
+let fullsearch (query: string) (dict: MyDictionary) =
     if isInvalid query then
         None
     else
@@ -79,7 +79,7 @@ let searchExact (query: string) (dict: MyDictionary) =
             | None -> None
 
 
-let searchPartial (query: string) (dict: MyDictionary) =
+let partialsearch (query: string) (dict: MyDictionary) =
     if isInvalid query then
         Map.empty
     else
