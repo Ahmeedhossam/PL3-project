@@ -13,7 +13,7 @@ let main argv =
     printfn "\n1. Adding 'Apple'..."
     // النتيجة بتتخزن في متغير اسمه dictAfterAdd
     let dictAfterAdd = 
-        match addWord "Apple" "A red fruit" myDict with
+        match addWord "  applne7...." "A red fruit" myDict with
         | Ok newDict -> 
             printfn " Success: Apple added!"
             newDict // بنرجع القاموس الجديد عشان نستخدمه في الخطوة الجاية
