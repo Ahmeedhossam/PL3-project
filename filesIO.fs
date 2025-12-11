@@ -19,7 +19,7 @@ let private jsonOptions =
 // SECTION 2: Asynchronous Operations (لعيون الـ GUI)
 // =========================================================
 
-/// دالة الحفظ (Async) - دي اللي هتستخدمها في الـ GUI
+/// دالة الحفظ (Async) - دي اللي هتستخدمها في الـ GUI.
 /// بتستخدم async block زي سلايد 13
 let saveDictionaryAsync (filePath: string) (dict: MyDictionary) =
     async {
