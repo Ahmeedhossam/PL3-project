@@ -82,11 +82,17 @@ let fullsearch (query: string) (dict: MyDictionary) =
 let partialsearch (query: string) (dict: MyDictionary) =
     if isInvalid query then
         Map.empty
-    else
-        let cleanQuery = clean query
+//        الإجابة: دالة partialsearch وظيفتها إنها ترجع "قائمة بالنتايج" اللي لقيتها. في البرمجة، لما بحث ميرجعش أي نتايج، قدامنا خيارين:
 
-        if String.IsNullOrWhiteSpace(cleanQuery) then
-            Map.empty
+//نرجع null (وده خطر وبيعمل Crashes).
+
+//نرجع "قائمة فاضية" (وده الصح والآمن).
+
+    else
+        let partialSearchQuery = clean query
+
+        if String.IsNullOrWhiteSpace(partialSearchQuery) then
+            Map.empty // why here we make map.empty ?   because if the cleaned query is empty, it means there are no valid letters to search for, so we return an empty map.  
         else
             dict
-            |> Map.filter (fun key _ -> key.Contains(cleanQuery))
+            |> Map.filter (fun key _ -> key.Contains(partialSearchQuery))

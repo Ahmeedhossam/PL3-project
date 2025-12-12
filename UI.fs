@@ -3,171 +3,138 @@
 open System
 open System.Windows.Forms
 open System.Drawing
-// استخدمنا الأسماء الـ small زي ما هي عندك
 open wordmodel 
 open Operations
 open filesIO
 
-type DictionaryForm() as form =
+// التعديل هنا: ضفنا "as this" عشان نعرف نستخدم كلمة this جوه
+type DictionaryForm() as this =
     inherit Form()
 
-    // الحالة (State)
+    // App State
     let mutable currentDict : MyDictionary = Map.empty
     let defaultPath = "dictionary.json"
 
-    // ==========================================
-    // تعريف العناصر (Controls)
-    // ==========================================
-    
-    let lblWord = new Label(Text = "Word:", Location = Point(20, 20), AutoSize = true)
+    // GUI Controls
+    let lblWord = new Label(Text = "Word:", Location = Point(20, 24), AutoSize = true)
     let txtWord = new TextBox(Location = Point(100, 20), Width = 200)
 
-    let lblMeaning = new Label(Text = "Meaning:", Location = Point(20, 60), AutoSize = true)
+    let lblMeaning = new Label(Text = "Meaning:", Location = Point(20, 64), AutoSize = true)
     let txtMeaning = new TextBox(Location = Point(100, 60), Width = 200)
 
     let btnAdd = new Button(Text = "Add", Location = Point(20, 100), Width = 80)
     let btnUpdate = new Button(Text = "Update", Location = Point(110, 100), Width = 80)
     let btnDelete = new Button(Text = "Delete", Location = Point(200, 100), Width = 80)
 
-    let separator = new Label(Text = "-----------------------------", Location = Point(20, 140), AutoSize = true)
-    let lblSearch = new Label(Text = "Search:", Location = Point(20, 170), AutoSize = true)
+    let separator = new Label(Text = String.replicate 45 "-", Location = Point(20, 140), AutoSize = true)
+    
+    let lblSearch = new Label(Text = "Search:", Location = Point(20, 175), AutoSize = true)
     let txtSearch = new TextBox(Location = Point(100, 170), Width = 120)
     let btnSearch = new Button(Text = "Find", Location = Point(230, 170), Width = 70)
     
     let lstResults = new ListBox(Location = Point(20, 210), Width = 280, Height = 150)
 
-    // غيرنا الاسم لـ Save بس لأنها مبقتش Async
     let btnSave = new Button(Text = "Save", Location = Point(20, 380), Width = 130)
     let btnLoad = new Button(Text = "Load", Location = Point(170, 380), Width = 130)
 
-    // ==========================================
-    // دوال مساعدة
-    // ==========================================
-    
+    // Helpers
     let showMsg msg = MessageBox.Show(msg, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information) |> ignore
     let showError msg = MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error) |> ignore
 
     let updateList (items: Map<string, string>) =
         lstResults.Items.Clear()
-        if items.IsEmpty then
-            lstResults.Items.Add("Dictionary is empty.") |> ignore
-        else
-            items |> Map.iter (fun k v -> lstResults.Items.Add(sprintf "%s -> %s" k v) |> ignore)
+        if items.IsEmpty then lstResults.Items.Add("No words found.") |> ignore
+        else items |> Map.iter (fun k v -> lstResults.Items.Add(sprintf "%s -> %s" k v) |> ignore)
 
     let clearInputs () =
-        txtWord.Text <- ""
-        txtMeaning.Text <- ""
+        txtWord.Clear()
+        txtMeaning.Clear()
         txtWord.Focus() |> ignore
 
-    // ==========================================
-    // الأحداث (Events)
-    // ==========================================
-
+    // Constructor
     do
-        form.Text <- "My F# Dictionary"
-        form.Size <- Size(350, 480)
-        form.StartPosition <- FormStartPosition.CenterScreen
-        form.FormBorderStyle <- FormBorderStyle.FixedSingle
-        form.MaximizeBox <- false
-        
-        // حل مشكلة المصفوفة: بنحول كل عنصر لـ Control
-        form.Controls.AddRange([| 
-            lblWord :> Control; txtWord :> Control; lblMeaning :> Control; txtMeaning :> Control;
-            btnAdd :> Control; btnUpdate :> Control; btnDelete :> Control;
-            separator :> Control; lblSearch :> Control; txtSearch :> Control; btnSearch :> Control;
-            lstResults :> Control; btnSave :> Control; btnLoad :> Control 
-        |])
+        // التعديل: استبدال base بـ this
+        this.Text <- "Dictionary App"
+        this.Size <- Size(350, 480)
+        this.StartPosition <- FormStartPosition.CenterScreen
+        this.FormBorderStyle <- FormBorderStyle.FixedSingle
+        this.MaximizeBox <- false
 
-        // زرار Add
+        // Add Controls
+        let controls : Control[] = [| 
+            lblWord; txtWord; lblMeaning; txtMeaning; 
+            btnAdd; btnUpdate; btnDelete; 
+            separator; lblSearch; txtSearch; btnSearch; 
+            lstResults; btnSave; btnLoad 
+        |]
+        this.Controls.AddRange(controls)
+
+        // Add Logic
         btnAdd.Click.Add(fun _ -> 
             match addWord txtWord.Text txtMeaning.Text currentDict with
             | Ok newDict -> 
                 currentDict <- newDict
-                showMsg "Word Added Successfully!"
+                showMsg "Added successfully"
                 clearInputs()
                 updateList currentDict
             | Error (InvalidInput msg) -> showError msg
-            | Error (WordAlreadyExists w) -> showError (sprintf "Word '%s' already exists!" w)
-            | Error (WordNotFound _) -> () 
+            | Error (WordAlreadyExists w) -> showError $"Word '{w}' already exists"
+            | Error _ -> ()
         )
 
-        // زرار Update
         btnUpdate.Click.Add(fun _ -> 
             match updateWord txtWord.Text txtMeaning.Text currentDict with
             | Ok newDict -> 
                 currentDict <- newDict
-                showMsg "Word Updated!"
+                showMsg "Updated successfully"
                 clearInputs()
                 updateList currentDict
-            | Error (WordNotFound w) -> showError (sprintf "Cannot update. Word '%s' not found." w)
+            | Error (WordNotFound w) -> showError $"Word '{w}' not found"
             | Error (InvalidInput msg) -> showError msg
             | Error _ -> ()
         )
 
-        // زرار Delete
         btnDelete.Click.Add(fun _ -> 
             match deleteWord txtWord.Text currentDict with
             | Ok newDict -> 
                 currentDict <- newDict
-                showMsg "Word Deleted!"
+                showMsg "Deleted successfully"
                 clearInputs()
                 updateList currentDict
-            | Error (WordNotFound w) -> showError (sprintf "Word '%s' not found." w)
+            | Error (WordNotFound w) -> showError $"Word '{w}' not found"
             | Error (InvalidInput msg) -> showError msg
             | Error _ -> ()
         )
 
-        // زرار Search (باستخدام partialsearch)
         btnSearch.Click.Add(fun _ -> 
             let query = txtSearch.Text
-            if String.IsNullOrWhiteSpace query then
-                showError "Please enter text to search."
+            if String.IsNullOrWhiteSpace query then showError "Enter text to search"
             else
                 let results = partialsearch query currentDict
-                
                 lstResults.Items.Clear()
-                if results.IsEmpty then
-                    lstResults.Items.Add("No matches found.") |> ignore
-                else
-                    results |> Map.iter (fun k v -> lstResults.Items.Add(sprintf "%s -> %s" k v) |> ignore)
+                if results.IsEmpty then lstResults.Items.Add("No matches.") |> ignore
+                else results |> Map.iter (fun k v -> lstResults.Items.Add($"{k} -> {v}") |> ignore)
         )
 
-        // ========================================================
-        // التغيير هنا: Save (مباشر بدون Async)
-        // ========================================================
         btnSave.Click.Add(fun _ -> 
-            form.Text <- "Saving..." 
-            
-            // نداء مباشر للدالة saveDictionary
-            let result = filesIO.saveDictionary defaultPath currentDict
-            
-            match result with
+            this.Text <- "Saving..."
+            match filesIO.saveDictionary defaultPath currentDict with
             | Ok msg -> showMsg msg
             | Error err -> showError err
-            
-            form.Text <- "My F# Dictionary"
+            this.Text <- "Dictionary App"
         )
 
-        // ========================================================
-        // التغيير هنا: Load (مباشر بدون Async)
-        // ========================================================
-        let loadData () = 
-            form.Text <- "Loading..."
-            
-            // نداء مباشر للدالة loadDictionary
-            let result = filesIO.loadDictionary defaultPath
-            
-            match result with
+        let loadData () =
+            this.Text <- "Loading..."
+            match filesIO.loadDictionary defaultPath with
             | Ok dict -> 
                 currentDict <- dict
                 updateList dict
             | Error err -> showError err
-            
-            form.Text <- "My F# Dictionary"
+            this.Text <- "Dictionary App"
 
-        // تشغيل التحميل
         btnLoad.Click.Add(fun _ -> loadData())
-        form.Load.Add(fun _ -> loadData())
+        this.Load.Add(fun _ -> loadData())
 
 let run () =
     Application.EnableVisualStyles()

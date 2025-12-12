@@ -4,85 +4,61 @@ open System
 open wordmodel
 open Operations
 
+// ==========================================
+// دالة مساعدة (تم تعديل الترتيب عشان الـ Pipe)
+// الترتيب الجديد: الاسم -> القاموس القديم -> النتيجة
+// ==========================================
+let private assertSuccess operationName oldDict result =
+    match result with
+    | Ok newDict -> 
+        printfn "✅ %s: Passed" operationName
+        newDict
+    | Error e -> 
+        printfn "❌ %s: Failed -> %A" operationName e
+        oldDict // بنرجع القديم عشان السلسلة متقفش
+
+// ==========================================
+// كود الاختبارات
+// ==========================================
 let runTests () =
-    printfn "🚀 Starting Automated Unit Tests..."
-    printfn "================================="
+    printfn "\n🚀 Starting Unit Tests...\n"
 
-    // الحالة الابتدائية: قاموس فاضي
-    let initialDict = Map.empty
+    // 1. البداية
+    let dict0 = Map.empty
 
-    // ---------------------------------------------------------
-    // Test 1: Adding a new word
-    // ---------------------------------------------------------
-    printfn "\n[Test 1] Adding 'Apple'..."
-    let dictAfterAdd = 
-        match addWord "Apple" "A red fruit" initialDict with
-        | Ok d -> 
-            printfn "✅ Passed: Word added successfully."
-            d
-        | Error e -> 
-            printfn "❌ Failed: Could not add word. Error: %A" e
-            initialDict
+    // 2. اختبار الإضافة
+    // لاحظ: بعتنا dict0 لدالة assertSuccess كمان
+    let dict1 = 
+        addWord "Apple" "A red fruit" dict0 
+        |> assertSuccess "Add 'Apple'" dict0
 
-    // ---------------------------------------------------------
-    // Test 2: Full Search (Exact Match)
-    // ---------------------------------------------------------
-    printfn "\n[Test 2] Searching for 'Apple' using fullsearch..."
-    // بنجرب نبحث بكلمة "APPLE" (كابيتال) عشان نختبر الـ clean كمان
-    match fullsearch "APPLE" dictAfterAdd with
-    | Some (k, v) when k = "apple" -> 
-        printfn "✅ Passed: Found key '%s' with meaning '%s'." k v
-    | _ -> 
-        printfn "❌ Failed: 'Apple' not found."
+    // 3. اختبار البحث الكامل
+    match fullsearch "APPLE" dict1 with
+    | Some (k, v) -> printfn "✅ Search 'APPLE': Found (%s -> %s)" k v
+    | None        -> printfn "❌ Search 'APPLE': Not Found"
 
-    // ---------------------------------------------------------
-    // Test 3: Partial Search
-    // ---------------------------------------------------------
-    printfn "\n[Test 3] Partial search for 'ppl'..."
-    let partialResults = partialsearch "ppl" dictAfterAdd
-    if partialResults.ContainsKey "apple" then
-        printfn "✅ Passed: Found 'apple' in partial results."
-    else
-        printfn "❌ Failed: Partial search did not return 'apple'."
+    // 4. اختبار البحث الجزئي
+    let partialRes = partialsearch "ppl" dict1
+    if partialRes.ContainsKey "apple" then 
+        printfn "✅ Partial Search 'ppl': Found 'apple'"
+    else 
+        printfn "❌ Partial Search 'ppl': Failed"
 
-    // ---------------------------------------------------------
-    // Test 4: Updating a word
-    // ---------------------------------------------------------
-    printfn "\n[Test 4] Updating 'Apple' meaning..."
-    let dictAfterUpdate = 
-        match updateWord "Apple" "Green or Red fruit" dictAfterAdd with
-        | Ok d -> 
-            printfn "✅ Passed: Update operation successful."
-            d
-        | Error e -> 
-            printfn "❌ Failed: Update error: %A" e
-            dictAfterAdd
+    // 5. اختبار التعديل
+    // لاحظ: بنبعت dict1 (آخر نسخة) للدالة وللـ assert
+    let dict2 = 
+        updateWord "Apple" "Green fruit" dict1 
+        |> assertSuccess "Update 'Apple'" dict1
 
-    // نتأكد إن المعنى اتغير فعلاً
-    match fullsearch "apple" dictAfterUpdate with
-    | Some (_, m) when m = "Green or Red fruit" -> 
-        printfn "✅ Passed: Meaning updated correctly in memory."
-    | _ -> 
-        printfn "❌ Failed: Meaning did not change."
+    // 6. اختبار الحذف
+    // لاحظ: بنبعت dict2
+    let dict3 = 
+        deleteWord "Apple" dict2 
+        |> assertSuccess "Delete 'Apple'" dict2
 
-    // ---------------------------------------------------------
-    // Test 5: Deleting a word
-    // ---------------------------------------------------------
-    printfn "\n[Test 5] Deleting 'Apple'..."
-    let dictAfterDelete = 
-        match deleteWord "Apple" dictAfterUpdate with
-        | Ok d -> 
-            printfn "✅ Passed: Delete operation successful."
-            d
-        | Error e -> 
-            printfn "❌ Failed: Delete error: %A" e
-            dictAfterUpdate
+    // 7. التأكد النهائي
+    match fullsearch "apple" dict3 with
+    | None   -> printfn "✅ Verification: Word is truly gone."
+    | Some _ -> printfn "❌ Verification: Word still exists!"
 
-    // نتأكد إنها اتمسحت
-    match fullsearch "apple" dictAfterDelete with
-    | None -> printfn "✅ Passed: Word is gone."
-    | Some _ -> printfn "❌ Failed: Word still exists after delete!"
-
-    printfn "\n================================="
-    printfn "🏁 All Tests Completed."
-    printfn "================================="
+    printfn "\n🏁 Tests Finished.\n"
