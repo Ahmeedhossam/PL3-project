@@ -3,7 +3,7 @@
 open System
 open System.Windows.Forms
 open System.Drawing
-// استخدمنا الأسماء الـ small زي ما هي عندك في المشروع
+// استخدمنا الأسماء الـ small زي ما هي عندك
 open wordmodel 
 open Operations
 open filesIO
@@ -36,8 +36,9 @@ type DictionaryForm() as form =
     
     let lstResults = new ListBox(Location = Point(20, 210), Width = 280, Height = 150)
 
-    let btnSave = new Button(Text = "Save (Async)", Location = Point(20, 380), Width = 130)
-    let btnLoad = new Button(Text = "Load (Async)", Location = Point(170, 380), Width = 130)
+    // غيرنا الاسم لـ Save بس لأنها مبقتش Async
+    let btnSave = new Button(Text = "Save", Location = Point(20, 380), Width = 130)
+    let btnLoad = new Button(Text = "Load", Location = Point(170, 380), Width = 130)
 
     // ==========================================
     // دوال مساعدة
@@ -116,15 +117,12 @@ type DictionaryForm() as form =
             | Error _ -> ()
         )
 
-        // زرار Search
+        // زرار Search (باستخدام partialsearch)
         btnSearch.Click.Add(fun _ -> 
             let query = txtSearch.Text
             if String.IsNullOrWhiteSpace query then
                 showError "Please enter text to search."
             else
-                // ====================================================
-                // التعديل هنا: استخدمنا اسم الدالة بتاعك partialsearch
-                // ====================================================
                 let results = partialsearch query currentDict
                 
                 lstResults.Items.Clear()
@@ -134,40 +132,42 @@ type DictionaryForm() as form =
                     results |> Map.iter (fun k v -> lstResults.Items.Add(sprintf "%s -> %s" k v) |> ignore)
         )
 
-        // زرار Save (Async)
+        // ========================================================
+        // التغيير هنا: Save (مباشر بدون Async)
+        // ========================================================
         btnSave.Click.Add(fun _ -> 
-            async {
-                btnSave.Enabled <- false
-                form.Text <- "Saving..." 
-                // استخدمنا filesIO سمول
-                let! result = filesIO.saveDictionaryAsync defaultPath currentDict
-                match result with
-                | Ok msg -> showMsg msg
-                | Error err -> showError err
-                form.Text <- "My F# Dictionary"
-                btnSave.Enabled <- true
-            } |> Async.StartImmediate
+            form.Text <- "Saving..." 
+            
+            // نداء مباشر للدالة saveDictionary
+            let result = filesIO.saveDictionary defaultPath currentDict
+            
+            match result with
+            | Ok msg -> showMsg msg
+            | Error err -> showError err
+            
+            form.Text <- "My F# Dictionary"
         )
 
-        // دالة Load المساعدة
+        // ========================================================
+        // التغيير هنا: Load (مباشر بدون Async)
+        // ========================================================
         let loadData () = 
-            async {
-                btnLoad.Enabled <- false
-                form.Text <- "Loading..."
-                // استخدمنا filesIO سمول
-                let! result = filesIO.loadDictionaryAsync defaultPath
-                match result with
-                | Ok dict -> 
-                    currentDict <- dict
-                    updateList dict
-                | Error err -> showError err
-                form.Text <- "My F# Dictionary"
-                btnLoad.Enabled <- true
-            } 
+            form.Text <- "Loading..."
+            
+            // نداء مباشر للدالة loadDictionary
+            let result = filesIO.loadDictionary defaultPath
+            
+            match result with
+            | Ok dict -> 
+                currentDict <- dict
+                updateList dict
+            | Error err -> showError err
+            
+            form.Text <- "My F# Dictionary"
 
-        // زرار Load وتشغيل التحميل عند الفتح
-        btnLoad.Click.Add(fun _ -> loadData() |> Async.StartImmediate)
-        form.Load.Add(fun _ -> loadData() |> Async.StartImmediate)
+        // تشغيل التحميل
+        btnLoad.Click.Add(fun _ -> loadData())
+        form.Load.Add(fun _ -> loadData())
 
 let run () =
     Application.EnableVisualStyles()

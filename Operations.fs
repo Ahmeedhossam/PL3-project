@@ -6,64 +6,64 @@ open System.Text.RegularExpressions
 
 
 
-// دالة للتحقق من المدخلات الفاضية قبل الـ clean
 let private isInvalid (s: string) = String.IsNullOrWhiteSpace(s)
 
-// دالة لتنضيف الكلمة (Trim + Lowercase + Remove symbols)
 let private clean (s: string) =
     if String.IsNullOrWhiteSpace(s) then ""
     else
         s.Trim()
-        |> fun str -> Regex.Replace(str, @"\s+", " ")          // شيل مسافات زيادة
-        |> fun str -> Regex.Replace(str, @"[^a-zA-Z\s]", "")   // شيل الرموز والأرقام
+        |> fun str -> Regex.Replace(str, @"\s+", " ")
+        |> fun str -> Regex.Replace(str, @"[^a-zA-Z\s]", "")
         |> fun str -> str.ToLower()
         |> fun str -> str.Trim()
 
 
-
 let addWord (word: string) (meaning: string) (dict: MyDictionary) =
     if isInvalid word || isInvalid meaning then
-        Error (InvalidInput "Word and meaning must be non-empty.")
+        Error (InvalidInput "Word and meaning must be not empty")
     else
         let key = clean word
+        let cleanMeaning = meaning.Trim() 
 
         if String.IsNullOrWhiteSpace(key) then
-            Error (InvalidInput "Word must contain valid letters only.")
+            Error (InvalidInput "Word must contain valid letters only")
         else
             match dict.ContainsKey key with
             | true -> Error (WordAlreadyExists word)
-            | false -> Ok (dict.Add(key, meaning))
+            | false -> Ok (dict.Add(key, cleanMeaning)) 
 
 
 let updateWord (word: string) (newMeaning: string) (dict: MyDictionary) =
     if isInvalid word || isInvalid newMeaning then
-        Error (InvalidInput "Word and meaning must be non-empty.")
+        Error (InvalidInput "Word and meaning must be not empty")
     else
         let key = clean word
+        
+        let cleanNewMeaning = newMeaning.Trim()
 
         if String.IsNullOrWhiteSpace(key) then
-            Error (InvalidInput "Word must contain valid letters only.")
+            Error (InvalidInput "Word must contain valid letters only")
         else
             match dict.TryFind key with
-            | Some _ -> Ok (dict.Add(key, newMeaning))
+            | Some _ -> Ok (dict.Add(key, cleanNewMeaning))
             | None -> Error (WordNotFound word)
 
 
 let deleteWord (word: string) (dict: MyDictionary) =
     if isInvalid word then
-        Error (InvalidInput "Word must be non-empty.")
+        Error (InvalidInput "Word must be not empty")
     else
         let key = clean word
 
         if String.IsNullOrWhiteSpace(key) then
-            Error (InvalidInput "Word must contain valid letters only.")
+            Error (InvalidInput "Word must contain valid letters only")
         else
             match dict.TryFind key with
             | Some _ -> Ok (dict.Remove key)
             | None -> Error (WordNotFound word)
 
 
-// Search Operations
+
 
 let fullsearch (query: string) (dict: MyDictionary) =
     if isInvalid query then

@@ -7,7 +7,7 @@ open System.Text.Json.Serialization
 open wordmodel
 
 // =========================================================
-// SECTION 1: Configuration
+// Configuration
 // =========================================================
 
 let private jsonOptions = 
@@ -16,54 +16,34 @@ let private jsonOptions =
     options
 
 // =========================================================
-// SECTION 2: Asynchronous Operations (لعيون الـ GUI)
+// Synchronous Operations (السهل الممتنع)
 // =========================================================
 
-/// دالة الحفظ (Async) - دي اللي هتستخدمها في الـ GUI.
-/// بتستخدم async block زي سلايد 13
-let saveDictionaryAsync (filePath: string) (dict: MyDictionary) =
-    async {
-        try
-            // بنجهز النص عادي
-            let jsonString = JsonSerializer.Serialize(dict, jsonOptions)
-            
-            // بنكتب في الملف بشكل Async عشان الماوس ميهنجش
-            // AwaitTask: عشان نحول من C# Task لـ F# Async
-            do! File.WriteAllTextAsync(filePath, jsonString) |> Async.AwaitTask
-            
-            return Ok "Dictionary saved successfully."
-        with
-        | ex -> return Error (sprintf "Failed to save to '%s': %s" filePath ex.Message)
-    }
-
-/// دالة التحميل (Async) - دي اللي هتستخدمها في الـ GUI
-/// بتستخدم let! زي سلايد 16
-let loadDictionaryAsync (filePath: string) =
-    async {
-        if File.Exists(filePath) then
-            try
-                // بنقرأ الملف في الخلفية
-                let! jsonString = File.ReadAllTextAsync(filePath) |> Async.AwaitTask
-                
-                let dict = JsonSerializer.Deserialize<MyDictionary>(jsonString, jsonOptions)
-                return Ok dict
-            with
-            | ex -> return Error (sprintf "File is corrupted: %s" ex.Message)
-        else
-            return Ok Map.empty
-    }
-
-// =========================================================
-// SECTION 3: Synchronous Operations (للـ Console)
-// =========================================================
-
-/// دالة الحفظ (Sync) - مجرد غلاف
-/// بتشغل الـ Async وتستناه يخلص (زي سلايد 11: RunSynchronously)
+/// دالة الحفظ (مباشرة بدون async)
 let saveDictionary (filePath: string) (dict: MyDictionary) =
-    saveDictionaryAsync filePath dict
-    |> Async.RunSynchronously
+    try
+        // 1. حولنا القاموس لنص
+        let jsonString = JsonSerializer.Serialize(dict, jsonOptions)
+        
+        // 2. كتبنا في الملف علطول (شيلنا do! و AwaitTask)
+        File.WriteAllText(filePath, jsonString)
+        
+        Ok "Dictionary saved successfully."
+    with
+    | ex -> Error (sprintf "Failed to save to '%s': %s" filePath ex.Message)
 
-/// دالة التحميل (Sync) - مجرد غلاف
+/// دالة التحميل (مباشرة بدون async)
 let loadDictionary (filePath: string) =
-    loadDictionaryAsync filePath
-    |> Async.RunSynchronously
+    if File.Exists(filePath) then
+        try
+            // 1. قرأنا الملف علطول (شيلنا let! و AwaitTask)
+            let jsonString = File.ReadAllText(filePath)
+            
+            // 2. حولنا النص لقاموس
+            let dict = JsonSerializer.Deserialize<MyDictionary>(jsonString, jsonOptions)
+            Ok dict
+        with
+        | ex -> Error (sprintf "File is corrupted: %s" ex.Message)
+    else
+        // لو الملف مش موجود، رجع قاموس فاضي
+        Ok Map.empty
