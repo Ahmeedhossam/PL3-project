@@ -82,11 +82,6 @@ let fullsearch (query: string) (dict: MyDictionary) =
 let partialsearch (query: string) (dict: MyDictionary) =
     if isInvalid query then
         Map.empty
-//        الإجابة: دالة partialsearch وظيفتها إنها ترجع "قائمة بالنتايج" اللي لقيتها. في البرمجة، لما بحث ميرجعش أي نتايج، قدامنا خيارين:
-
-//نرجع null (وده خطر وبيعمل Crashes).
-
-//نرجع "قائمة فاضية" (وده الصح والآمن).
 
     else
         let partialSearchQuery = clean query

@@ -2,14 +2,11 @@
 open System
 
 
-// شكل الديكش. المطلوب 
 type MyDictionary = Map<string, string>
 
 
 
-//هنا استخدمنا الي اتشرح في السكشن 
-// Discriminated Unions
-//بدل ما ارمي exceptions مباشرا
+
  
  
 

@@ -7,7 +7,6 @@ open wordmodel
 open Operations
 open filesIO
 
-// التعديل هنا: ضفنا "as this" عشان نعرف نستخدم كلمة this جوه
 type DictionaryForm() as this =
     inherit Form()
 
@@ -53,7 +52,6 @@ type DictionaryForm() as this =
 
     // Constructor
     do
-        // التعديل: استبدال base بـ this
         this.Text <- "Dictionary App"
         this.Size <- Size(350, 480)
         this.StartPosition <- FormStartPosition.CenterScreen
