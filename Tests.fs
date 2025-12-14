@@ -7,14 +7,15 @@ open Operations
 let private assertSuccess operationName oldDict result =
     match result with
     | Ok newDict -> 
-        printfn "%s: Success." operationName
+        printfn "%s: Success" operationName
         newDict
     | Error e -> 
-        printfn "%s: Failed. Error details: %A" operationName e
+        printfn "%s: Failed Error details: %A" operationName e
         oldDict 
 
 let runTests () =
-    printfn "\nStarting unit tests...\n"
+    printfn "\nStarting unit tests
+    \n"
 
     let dict0 = Map.empty
 
@@ -34,4 +35,4 @@ let runTests () =
     | None    -> printfn "Verification: The word was successfully removed."
     | Some _ -> printfn "Verification: Error, the word still exists."
 
-    printfn "\nTests completed.\n"
+    printfn "\nTests completed\n"
