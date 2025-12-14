@@ -6,13 +6,13 @@ open FSharp.SystemTextJson
 open System.Text.Json.Serialization
 open wordmodel
 
-
+//settings
 let private jsonOptions = 
     let options = JsonSerializerOptions(WriteIndented = true)
     options.Converters.Add(JsonFSharpConverter())
     options
 
-
+//save dictionary 
 let saveDictionary (filePath: string) (dict: MyDictionary) =
     try
         let jsonString = JsonSerializer.Serialize(dict, jsonOptions)
@@ -22,7 +22,7 @@ let saveDictionary (filePath: string) (dict: MyDictionary) =
         Ok "Dictionary saved successfully."
     with
     | ex -> Error (sprintf "Failed to save to '%s': %s" filePath ex.Message)
-
+//load dictionary 
 let loadDictionary (filePath: string) =
     if File.Exists(filePath) then
         try
